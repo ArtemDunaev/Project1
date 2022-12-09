@@ -4,16 +4,24 @@ import common
 class Sonar(common.Common):
 
 
-    def get_coordinates(self,signalLeft,signalRight):
-        spectrumLeft = np.fft.fft(signalLeft)
-        spectrumRight = np.fft.fft(signalRight)
+    def get_coordinates(self, signalleft, signalright):
+        spectrumleft = np.fft.fft(signalleft)
+        spectrumright = np.fft.fft(signalright)
 
 
-        n = spectrumLeft.size
-        spectrumLeft[int(n/2):] = 0
-        zLeft = np.abs(np.fft.ifft(spectrumLeft))
-        sigma = np.sqrt( (np.sum(np.sqrt(zLeft))/n) )
-        detection_level = np.where(zLeft>=sigma)
-        print(detection_level)
-        distance = ((detection_level[0][0])/self.fd) * 1500
-        print(distance)
+        n = spectrumleft.size
+        spectrumleft[int(n/2):] = 0
+        signalleft = np.fft.ifft(spectrumleft)
+        spectrumright[int(n / 2):] = 0
+        signalright = np.fft.ifft(spectrumright)
+
+
+        phileft = np.angle(signalleft)
+        phiright = np.angle(signalright)
+        deltaphi = phiright - phileft
+        deltaphi[np.where(deltaphi < -np.pi)] += 2 * np.pi
+        deltaphi[np.where(deltaphi > np.pi)] -= 2 * np.pi
+        mean_deltaphi = sum(deltaphi) / deltaphi.size
+        print("Middle phase = ", mean_deltaphi)
+        peleng = np.arcsin((self.c * mean_deltaphi) / (2 * np.pi * self.fs * self.d))
+        print("End angle = ", peleng * (180 / np.pi))
